@@ -109,18 +109,21 @@ class Manager
             }
         }
 
-        foreach ($this->files->files($this->app['path.lang']) as $jsonTranslationFile) {
-            if (strpos($jsonTranslationFile, '.json') === false) {
-                continue;
-            }
-            $locale = basename($jsonTranslationFile, '.json');
-            $group = self::JSON_GROUP;
-            $translations =
-                \Lang::getLoader()->load($locale, '*', '*'); // Retrieves JSON entries of the given locale only
-            if ($translations && is_array($translations)) {
-                foreach ($translations as $key => $value) {
-                    $importedTranslation = $this->importTranslation($key, $value, $locale, $group, $replace);
-                    $counter += $importedTranslation ? 1 : 0;
+        foreach($this->getConfig('json_groups') as $group => $path){
+            foreach($this->files->files($path) as $jsonTranslationFile){
+                if (strpos($jsonTranslationFile, '.json') === false) {
+                    continue;
+                }
+                $locale = basename($jsonTranslationFile, '.json');
+                $group = $group;
+
+                $translations = \Lang::getLoader()->load($locale, '*', '*'); // Retrieves JSON entries of the given locale only
+
+                if ($translations && is_array($translations)) {
+                    foreach ($translations as $key => $value) {
+                        $importedTranslation = $this->importTranslation($key, $value, $locale, $group, $replace);
+                        $counter += $importedTranslation ? 1 : 0;
+                    }
                 }
             }
         }
